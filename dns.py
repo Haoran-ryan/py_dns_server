@@ -36,6 +36,24 @@ def getflags(flags):
     RCODE = '0000'
     
     return int(QR + OPCODE + AA + TC + RD, 2).to_bytes(1, byteorder='big') + int(RA+Z+RCODE, 2).to_bytes(1, 'big')
+
+def getquestiondomain(data):
+    
+    state = 0
+    expectedlen = 0 
+    domainstring = ''
+    domainparts = []
+    x = 0 
+    
+    for byte in data:
+        if state == 1:
+            domainstring += chr(byte)
+        else:
+            # 传入的信息格式：信息长度 + 实际信息
+            # state = 0 ，则可以提取传入信息的开头，即”信息长度“
+            state = 1
+            expectedlen = byte 
+        print(domainstring)
 def buildresponse(data):
     # data in stream of Bytes 
     transactionID = data[0:2]
@@ -46,7 +64,11 @@ def buildresponse(data):
     # Get the flags
     flags = getflags(data[2:4])
     
-    print(flags)
+    # Question count
+    QDCOUNT = b'\x00\x01'
+    
+    # Answer count 
+    getquestiondomain(data[12:])
     
 while True:
     data, addr = sock.recvfrom(512)
